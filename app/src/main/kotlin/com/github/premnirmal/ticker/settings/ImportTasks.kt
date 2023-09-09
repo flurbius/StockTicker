@@ -190,10 +190,7 @@ internal object WidgetImporter {
                 BufferedReader(InputStreamReader(inputStream)).use { reader ->
                     val json: String = reader.readText()
                     widget = gson.fromJson(json, ExportWidget::class.java)
-                    val list = widgetData.getTickers()
-                    for (t in list) {
-                        widgetData.removeStock(t)
-                    }
+                    widgetData.clearTickers()
                     widgetData.addTickers(widget.tickerList.split(","))
                     widgetData.setAutoSort(widget.autoSort.toBooleanStrict())
                     widgetData.setBoldEnabled(widget.showBold.toBooleanStrict())
@@ -204,6 +201,7 @@ internal object WidgetImporter {
                     widgetData.setLayoutPref(widget.layout.toInt())
                     widgetData.setWidgetSizePref(widget.widgetSize.toInt())
                     widgetData.setWidgetName(widget.name)
+                    widgetData.widgetDataProvider.broadcastUpdateWidget(widgetData.widgetId)
                     true
                 }
             } ?: false

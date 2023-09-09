@@ -362,6 +362,7 @@ class WidgetSettingsFragment : BaseFragment<FragmentWidgetSettingsBinding>(), Ch
                 showDialog(getString(R.string.something_went_wrong))
                 Timber.w(Throwable("Import Error"))
             } else {
+                broadcastUpdateWidget()
                 showDialog(getString(R.string.widget_data_updated))
             }
         }
