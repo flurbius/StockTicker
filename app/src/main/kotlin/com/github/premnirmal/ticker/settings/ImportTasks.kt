@@ -178,7 +178,6 @@ internal object WidgetImporter {
     lateinit var widget: ExportWidget
 
     fun getExportWidget(): ExportWidget {
-//    if (widget == null) wait()
         return widget
     }
 
@@ -196,12 +195,12 @@ internal object WidgetImporter {
                     widgetData.setBoldEnabled(widget.showBold.toBooleanStrict())
                     widgetData.setCurrencyEnabled(widget.showCurrency.toBooleanStrict())
                     widgetData.setHideHeader(widget.hideHeader.toBooleanStrict())
+
                     widgetData.setTextColorPref(widget.textColor.toInt())
                     widgetData.setBgPref(widget.background.toInt())
                     widgetData.setLayoutPref(widget.layout.toInt())
                     widgetData.setWidgetSizePref(widget.widgetSize.toInt())
                     widgetData.setWidgetName(widget.name)
-                    widgetData.widgetDataProvider.broadcastUpdateWidget(widgetData.widgetId)
                     true
                 }
             } ?: false

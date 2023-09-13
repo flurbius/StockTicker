@@ -9,9 +9,11 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.ArrayRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.allViews
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +34,7 @@ import com.github.premnirmal.tickerwidget.R
 import com.github.premnirmal.tickerwidget.databinding.FragmentWidgetSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import okhttp3.internal.notify
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
@@ -93,18 +96,8 @@ class WidgetSettingsFragment : BaseFragment<FragmentWidgetSettingsBinding>(), Ch
             binding.previewContainer.setBackgroundResource(R.drawable.bg_header)
         }
         val widgetData = widgetDataProvider.dataForWidgetId(widgetId)
-        setWidgetNameSetting(widgetData)
-        setLayoutTypeSetting(widgetData)
-        setWidgetSizeSetting(widgetData)
-        setBoldSetting(widgetData)
-        setAutoSortSetting(widgetData)
-        setHideHeaderSetting(widgetData)
-        setCurrencySetting(widgetData)
-        setBgSetting(widgetData)
-        setTextColorSetting(widgetData)
-        adapter = WidgetPreviewAdapter(widgetData)
-        binding.widgetLayout.list.adapter = adapter
-        updatePreview(widgetData)
+        updateUI(widgetData)
+        view.findViewById<Spinner>(R.id.widget_selection_spinner)
 
         arrayOf(
             binding.settingAddStock,
@@ -270,8 +263,28 @@ class WidgetSettingsFragment : BaseFragment<FragmentWidgetSettingsBinding>(), Ch
             .show()
     }
 
+    private fun updateUI(widgetData: WidgetData){
+        setWidgetNameSetting(widgetData)
+        setLayoutTypeSetting(widgetData)
+        setWidgetSizeSetting(widgetData)
+        setBoldSetting(widgetData)
+        setAutoSortSetting(widgetData)
+        setHideHeaderSetting(widgetData)
+        setCurrencySetting(widgetData)
+        setBgSetting(widgetData)
+        setTextColorSetting(widgetData)
+        adapter = WidgetPreviewAdapter(widgetData)
+        binding.widgetLayout.list.adapter = adapter
+        updatePreview(widgetData)
+        val spinner = view?.rootView?.findViewById<Spinner>(R.id.widget_selection_spinner)
+        if (spinner != null){
+            spinner.adapter.notify()
+        }
+        //binding.widgetSelectionSpinner.setSelection(position)
+    }
     private fun setWidgetNameSetting(widgetData: WidgetData) {
         binding.settingWidgetName.setSubtitle(widgetData.widgetName())
+
     }
 
     private fun setWidgetSizeSetting(widgetData: WidgetData) {
@@ -325,6 +338,7 @@ class WidgetSettingsFragment : BaseFragment<FragmentWidgetSettingsBinding>(), Ch
         val time = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
         val nextUpdate = time.createTimeString()
         val nextUpdateText: String = getString(R.string.next_fetch, nextUpdate)
+        binding.widgetLayout.root.findViewById<TextView>(R.id.widget_name).text = widgetData.widgetName()
         binding.widgetLayout.root.findViewById<TextView>(R.id.next_update).text = nextUpdateText
         binding.widgetLayout.root.findViewById<View>(R.id.widget_header).isVisible =
             !widgetData.hideHeader()
@@ -362,6 +376,7 @@ class WidgetSettingsFragment : BaseFragment<FragmentWidgetSettingsBinding>(), Ch
                 showDialog(getString(R.string.something_went_wrong))
                 Timber.w(Throwable("Import Error"))
             } else {
+                updateUI(widgetData)
                 broadcastUpdateWidget()
                 showDialog(getString(R.string.widget_data_updated))
             }
